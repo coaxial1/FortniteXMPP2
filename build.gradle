@@ -9,10 +9,13 @@ sourceCompatibility = 11
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
-    compile group: 'io.github.robertograham', name: 'fortnite-2', version: '3.1.0'
+   // compile group: 'io.github.robertograham', name: 'fortnite-2', version: '3.1.0'
+    compile 'com.github.coaxial1:fortnite-2:master-SNAPSHOT'
     compile group: 'org.igniterealtime.smack', name: 'smack-tcp', version: '4.3.3'
     compile group: 'org.igniterealtime.smack', name: 'smack-extensions', version: '4.3.3'
     compile group: 'org.igniterealtime.smack', name: 'smack-java7', version: '4.3.3'
@@ -20,4 +23,14 @@ dependencies {
     compile group: 'com.google.flogger', name: 'flogger', version: '0.4'
     runtime group: 'com.google.flogger', name: 'flogger-system-backend', version: '0.4'
     compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+}
+
+jar {
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+    }
 }

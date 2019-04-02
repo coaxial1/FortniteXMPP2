@@ -60,6 +60,17 @@ public final class PartyData implements PartyRequest {
     }
 
     /**
+     * Creates a new instance that changes the custom key
+     *
+     * @param customKey the custom key to use, can be {@code ""}
+     * @param partyId   the ID of the party
+     * @return a new {@link PartyData} instance
+     */
+    public static PartyData forNewPlaylistAndCustomKey(final String newPlaylist, final String customKey, final String partyId) {
+        return new PartyData(newPlaylist, customKey, partyId);
+    }
+
+    /**
      * Creates a new instance that changes the privacy settings
      *
      * @param configuration the configuration to use
@@ -140,7 +151,8 @@ public final class PartyData implements PartyRequest {
 
         if (optionalCustomKey != null) {
             attributes.add("CustomMatchKey_s", optionalCustomKey);
-        } else {
+        }
+        if(playlistName != null) {
             attributes.add("PlaylistData_j", Json.createObjectBuilder()
                     .add("PlaylistData", Json.createObjectBuilder()
                             .add("playlistName", playlistName)

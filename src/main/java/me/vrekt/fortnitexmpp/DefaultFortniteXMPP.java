@@ -12,8 +12,11 @@ import me.vrekt.fortnitexmpp.friend.DefaultFriendResource;
 import me.vrekt.fortnitexmpp.friend.FriendResource;
 import me.vrekt.fortnitexmpp.party.DefaultPartyResource;
 import me.vrekt.fortnitexmpp.party.PartyResource;
+import me.vrekt.fortnitexmpp.presence.DefaultPresenceResource;
+import me.vrekt.fortnitexmpp.presence.PresenceResource;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -39,6 +42,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
     private DefaultChatResource chatResource;
     private DefaultFriendResource friendResource;
     private DefaultPartyResource partyResource;
+    private DefaultPresenceResource presenceResource;
 
     /**
      * Creates a new instance of {@link FortniteXMPP}
@@ -86,6 +90,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
                     .setConnectTimeout(60000)
                     .build());
 
+            // for large friend accounts
             final var roster = Roster.getInstanceFor(connection);
             roster.setRosterLoadedAtLogin(false);
 
@@ -100,9 +105,11 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
             final var pingManager = PingManager.getInstanceFor(connection);
             pingManager.setPingInterval(60);
 
-            chatResource = new DefaultChatResource(connection);
+            chatResource = new DefaultChatResource(this);
             friendResource = new DefaultFriendResource(this);
             partyResource = new DefaultPartyResource(this);
+            presenceResource = new DefaultPresenceResource(this);
+            connection.sendStanza(new Presence(Presence.Type.available));
             LOGGER.atInfo().log("Finished loading!");
         } catch (final IOException | SmackException | XMPPException | InterruptedException exception) {
             throw new XMPPAuthenticationException("Could not connect to the XMPP service.", exception);
@@ -111,7 +118,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
     }
 
     @Override
-    public void connectAsync(Consumer<Boolean> callback) {
+    public void connectAsync(final Consumer<Boolean> callback) {
         CompletableFuture.runAsync(() -> {
             try {
                 connect();
@@ -128,6 +135,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
         chatResource.close();
         friendResource.close();
         partyResource.close();
+        presenceResource.close();
         connection.disconnect();
     }
 
@@ -169,5 +177,10 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
     @Override
     public PartyResource party() {
         return partyResource;
+    }
+
+    @Override
+    public PresenceResource presence() {
+        return presenceResource;
     }
 }

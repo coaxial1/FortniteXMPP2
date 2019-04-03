@@ -1,6 +1,7 @@
 package me.vrekt.fortnitexmpp;
 
 import io.github.robertograham.fortnite2.client.Fortnite;
+import io.github.robertograham.fortnite2.implementation.DefaultFortnite;
 import me.vrekt.fortnitexmpp.chat.ChatResource;
 import me.vrekt.fortnitexmpp.exception.FortniteAuthenticationException;
 import me.vrekt.fortnitexmpp.exception.XMPPAuthenticationException;
@@ -10,6 +11,7 @@ import me.vrekt.fortnitexmpp.presence.PresenceResource;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jxmpp.jid.EntityFullJid;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public interface FortniteXMPP {
@@ -21,13 +23,13 @@ public interface FortniteXMPP {
     /**
      * Create a new {@link FortniteXMPP} instance.
      *
-     * @param fortnite     the already authenticated {@link Fortnite} instance
+     * @param builder      the builder instance used to authenticate to fortnite.
      * @param appType      the application type to use. Either {@code AppType.FORTNITE} or {@code AppType.LAUNCHER}
      * @param platformType the type of platform
      * @return a new {@link FortniteXMPP} instance.
      */
-    static FortniteXMPP newFortniteXMPP(final Fortnite fortnite, AppType appType, final PlatformType platformType) {
-        return new DefaultFortniteXMPP(fortnite, appType, platformType);
+    static FortniteXMPP newFortniteXMPP(final DefaultFortnite.Builder builder, AppType appType, final PlatformType platformType) throws FortniteAuthenticationException {
+        return new DefaultFortniteXMPP(builder, appType, platformType);
     }
 
     /**
@@ -55,7 +57,28 @@ public interface FortniteXMPP {
      *
      * @param callback the callback
      */
-    void connectAsync(Consumer<Boolean> callback);
+    void connectAsync(final Consumer<Boolean> callback);
+
+    /**
+     * Attempts to reestablish the connection after the specified {@code timeout}
+     *
+     * @param timeout the timeout
+     * @param unit    the time unit
+     */
+    void reestablishConnectionOnceAfter(final long timeout, final TimeUnit unit);
+
+    /**
+     * Keeps the XMPP connection alive, reconnecting after every {@code reconnectionPeriod}
+     *
+     * @param reconnectionPeriod the time to wait between reconnect.
+     * @param unit               the time unit.
+     */
+    void keepConnectionAlive(final long reconnectionPeriod, final TimeUnit unit);
+
+    /**
+     * @return {@code true} if a connection attempt is being made to the XMPP service.
+     */
+    boolean isReconnecting();
 
     /**
      * Disconnects from the XMPP service and disposes of everything created.
@@ -63,6 +86,18 @@ public interface FortniteXMPP {
      * with packets next time you connect.
      */
     void disconnect();
+
+    /**
+     * If {@code log} is {@code true} then all exceptions/warnings will be logged.
+     *
+     * @param log if logging should be enabled.
+     */
+    void logExceptionsAndWarnings(final boolean log);
+
+    /**
+     * @param loadRoster if {@code true} the roster will be loaded. Not recommended for large friend accounts.
+     */
+    void setLoadRoster(final boolean loadRoster);
 
     /**
      * @return the {@link Fortnite} instance created or provided.
@@ -109,6 +144,9 @@ public interface FortniteXMPP {
      */
     PresenceResource presence();
 
+    /**
+     * Valid types for the XMPP service.
+     */
     enum AppType {
         FORTNITE("Fortnite"), LAUNCHER("launcher");
 
@@ -123,6 +161,9 @@ public interface FortniteXMPP {
         }
     }
 
+    /**
+     * Valid platforms Fortnite can be played on.
+     */
     enum PlatformType {
         WIN, MAC, IOS, AND, PSN, XBL, SWT
     }

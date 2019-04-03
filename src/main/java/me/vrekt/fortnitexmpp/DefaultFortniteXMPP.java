@@ -83,7 +83,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
      */
     DefaultFortniteXMPP(final String emailAddress, final String password, final AppType appType, final PlatformType platformType) throws FortniteAuthenticationException {
         try {
-            this.fortniteBuilder = DefaultFortnite.Builder.newInstance(emailAddress, password);
+            this.fortniteBuilder = DefaultFortnite.Builder.newInstance(emailAddress, password).setDeviceId("00:0c:29:5b:97:de");
             this.fortnite = fortniteBuilder.build();
             this.appType = appType;
             this.platformType = platformType;

@@ -115,6 +115,7 @@ public final class DefaultFriendResource implements FriendResource {
                 }
 
             } catch (final Exception exception) {
+                exception.printStackTrace();
                 LOGGER.atWarning().log("Failed to parse message JSON.");
             }
         }

@@ -44,8 +44,9 @@ public final class PartyData implements PartyRequest {
      * @param partyId     the ID of the party
      * @return a new {@link PartyData} instance
      */
-    public static PartyData forNewPlaylist(final String newPlaylist, final String partyId) {
-        return new PartyData(newPlaylist, null, partyId);
+    public static PartyData forNewPlaylist(final String newPlaylist, final String partyId, final String tournamentId,
+                                           final String eventWindowId) {
+        return new PartyData(newPlaylist, null, partyId, tournamentId, eventWindowId);
     }
 
     /**
@@ -56,7 +57,7 @@ public final class PartyData implements PartyRequest {
      * @return a new {@link PartyData} instance
      */
     public static PartyData forNewCustomKey(final String customKey, final String partyId) {
-        return new PartyData("", customKey, partyId);
+        return new PartyData("", customKey, partyId, "", "");
     }
 
     /**
@@ -66,8 +67,9 @@ public final class PartyData implements PartyRequest {
      * @param partyId   the ID of the party
      * @return a new {@link PartyData} instance
      */
-    public static PartyData forNewPlaylistAndCustomKey(final String newPlaylist, final String customKey, final String partyId) {
-        return new PartyData(newPlaylist, customKey, partyId);
+    public static PartyData forNewPlaylistAndCustomKey(final String newPlaylist, final String tournamentId,
+                                                       final String eventWindowId, final String customKey, final String partyId) {
+        return new PartyData(newPlaylist, customKey, partyId, tournamentId, eventWindowId);
     }
 
     /**
@@ -144,7 +146,8 @@ public final class PartyData implements PartyRequest {
      * @param optionalCustomKey the custom key to use
      * @param partyId           the ID of the party
      */
-    private PartyData(final String playlistName, final String optionalCustomKey, final String partyId) {
+    private PartyData(final String playlistName, final String optionalCustomKey, final String partyId,
+                      final String tournamentId, final String eventWindowId) {
         final var payload = Json.createObjectBuilder();
         final var attributes = Json.createObjectBuilder();
         payload.add("Rev", RequestBuilder.getRevisionFor(PartyType.PARTY_DATA));
@@ -156,8 +159,8 @@ public final class PartyData implements PartyRequest {
             attributes.add("PlaylistData_j", Json.createObjectBuilder()
                     .add("PlaylistData", Json.createObjectBuilder()
                             .add("playlistName", playlistName)
-                            .add("tournamentId", "")
-                            .add("eventWindowId", "").build()).build());
+                            .add("tournamentId", tournamentId)
+                            .add("eventWindowId", eventWindowId).build()).build());
         }
         this.payload = RequestBuilder.buildRequestDoublePayload(partyId, payload.add("Attrs", attributes).build(), PartyType.PARTY_DATA).toString();
     }

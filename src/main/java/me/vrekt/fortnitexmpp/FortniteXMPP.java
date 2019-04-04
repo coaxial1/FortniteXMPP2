@@ -100,6 +100,20 @@ public interface FortniteXMPP {
     void setLoadRoster(final boolean loadRoster);
 
     /**
+     * Adds a reconnect listener, consumes {@code null} when a reconnection is happening.
+     *
+     * @param consumer the consumer
+     */
+    void onReconnect(final Consumer<Void> consumer);
+
+    /**
+     * Adds a connected listener, consumes {@code null} when a successful connection is established.
+     *
+     * @param consumer the consumer
+     */
+    void onConnected(final Consumer<Void> consumer);
+
+    /**
      * @return the {@link Fortnite} instance created or provided.
      */
     Fortnite fortnite();

@@ -41,8 +41,8 @@ public interface FortniteXMPP {
      * @param platformType the type of platform
      * @return a new {@link FortniteXMPP} instance.
      */
-    static FortniteXMPP newFortniteXMPP(final String emailAddress, final String password, final AppType appType, final PlatformType platformType) throws FortniteAuthenticationException {
-        return new DefaultFortniteXMPP(emailAddress, password, appType, platformType);
+    static FortniteXMPP newFortniteXMPP(final String emailAddress, final String password, final AppType appType, final PlatformType platformType, final String deviceID) throws FortniteAuthenticationException {
+        return new DefaultFortniteXMPP(emailAddress, password, appType, platformType,deviceID);
     }
 
     /**

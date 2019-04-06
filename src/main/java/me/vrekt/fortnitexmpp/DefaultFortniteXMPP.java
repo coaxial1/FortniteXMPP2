@@ -106,7 +106,8 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
             fortnite.account().findOneBySessionAccountId().ifPresent(acc -> this.account = acc);
             final var accessToken = fortnite.session().accessToken();
 
-            final var random = RandomStringUtils.randomAlphanumeric(32).toUpperCase();
+            final var hexChars = new char[]{'A','B','C','D','E','F','0','1','2','3','4','5','6','7','8','9'};
+            final var random = RandomStringUtils.random(32,0,0,true,true, hexChars);
             final var resource = "V2:" + appType.getName() + ":" + platformType.name() + "::" + random;
 
             connection = new XMPPTCPConnection(XMPPTCPConnectionConfiguration.builder()
@@ -175,15 +176,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
 
     @Override
     public void reestablishConnectionOnceAfter(final long timeout, final TimeUnit unit) {
-        CompletableFuture.delayedExecutor(timeout, unit).execute(this::reconnectCleanerxD);
-    }
-
-    private void reconnectCleanerxD() {
-        LOGGER.atInfo().log("Attempting reconnect in 2 seconds!");
-        reconnecting.set(true);
-
-        disconnect();
-        CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(DefaultFortniteXMPP.this::reconnectClean);
+        CompletableFuture.delayedExecutor(timeout, unit).execute(this::reconnectClean);
     }
 
     @Override
@@ -200,7 +193,7 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
 
     @Override
     public void keepConnectionAlive(final long reconnectionPeriod, final TimeUnit unit) {
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::reconnectCleanerxD,
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::reconnectClean,
                 reconnectionPeriod, reconnectionPeriod, unit);
     }
 
@@ -244,6 +237,8 @@ public final class DefaultFortniteXMPP implements FortniteXMPP {
      * Disconnects without closing the existing resources.
      */
     private void disconnectWithoutClosingResources() {
+        LOGGER.atWarning().log("Disconnecting services without closing resources. Last access token: " + this.fortnite.session().accessToken() +
+                " ; Refresh: " + this.fortnite.session().refreshToken());
         fortnite.close();
         chatResource.closeDirty();
         friendResource.closeDirty();
